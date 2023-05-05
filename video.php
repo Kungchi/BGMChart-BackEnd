@@ -8,7 +8,7 @@ $mongoClient = new MongoDB\Client("mongodb://localhost:27017");
 
 while(true) {
   // MongoDB에 연결
-  $mongoCollection = $mongoClient->Music->Merge;
+  $mongoCollection = $mongoClient->Music->test;
   $documents = $mongoCollection->find([]);
 
   if (!extension_loaded('apcu')) {
@@ -31,7 +31,6 @@ while(true) {
       $videoId = apcu_fetch($cacheKey);
 
       $url = "https://www.google.com/search?q=$title%20$singer%20youtube";
-
       if ($videoId === false) {
         $crawler = $client->request('GET', $url);
         $videoId_node = $crawler->filter('div.ct3b9e > div > a');
@@ -41,6 +40,23 @@ while(true) {
           $pos = strpos($href, '=');
           if ($pos !== false) {
             $videoId = substr($href, $pos + 1); // = 이후의 문자열 추출
+            $secondEqualPos = strpos($videoId, '='); // 두 번째 = 의 위치 찾기
+            $ampersandPos = strpos($videoId, '&'); // & 의 위치 찾기
+            if ($secondEqualPos !== false && $ampersandPos !== false) {
+              // 두 번째 =와 & 중 먼저 나오는 문자의 위치를 기준으로 분할
+              $delimiterPos = min($secondEqualPos, $ampersandPos);
+          } elseif ($secondEqualPos !== false) {
+              $delimiterPos = $secondEqualPos;
+          } elseif ($ampersandPos !== false) {
+              $delimiterPos = $ampersandPos;
+          } else {
+              $delimiterPos = false;
+          }
+  
+          if ($delimiterPos !== false) {
+              $videoId = substr($videoId, 0, $delimiterPos); // 구분자 이전의 문자열 추출
+          }
+            file_put_contents('urls.txt', $videoId . "\n", FILE_APPEND);
             apcu_store($cacheKey, $videoId);
           } else {
             error_log('Video ID not found for document1 ' . $document->title, 0);
@@ -58,6 +74,12 @@ while(true) {
   $mongoClient->Music->Melon->drop();
   $mongoClient->Music->Bugs->drop();
   $mongoClient->Music->Genie->drop();
+  $mongoClient->Music->Merge->drop();
+
+  $testCollectionData = $mongoClient->Music->test->find()->toArray();
+  $mongoClient->Music->Merge->insertMany($testCollectionData);
+  $mongoClient->Music->test->drop();
+
   sleep(3600);
 }
 ?>

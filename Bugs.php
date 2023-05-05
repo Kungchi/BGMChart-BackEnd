@@ -9,6 +9,7 @@ require 'vendor/autoload.php';
  while(true) {
     // MongoDB에 연결
     $mongoCollection = $mongoClient->Music->Bugs;
+    $mongoCollection->deleteMany([]);
 
     // Goutte Client 생성
     $client = new Client();

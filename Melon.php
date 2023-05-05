@@ -9,6 +9,7 @@ $mongoClient = new MongoDB\Client("mongodb://localhost:27017");
 while(true) {
     // MongoDB에 연결
     $mongoCollection = $mongoClient->Music->Melon;
+    $mongoCollection->deleteMany([]);
 
     // Goutte Client 생성
     $client = new Client();
@@ -22,7 +23,7 @@ while(true) {
     $client->setServerParameter('HTTP_USER_AGENT', $header['User-Agent']);
 
     // 크롤링할 페이지 URL
-    $url = "https://www.melon.com/chart/day/index.htm";
+    $url = "https://www.melon.com/chart/index.htm";
 
     // HTML 페이지 가져오기
     $crawler = $client->request('GET', $url);

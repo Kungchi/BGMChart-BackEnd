@@ -8,7 +8,7 @@ $mongoClient = new MongoDB\Client("mongodb://localhost:27017");
 
 while(true) {
   // MongoDB에 연결
-  $mongoCollection = $mongoClient->Music->Merge;
+  $mongoCollection = $mongoClient->Music->test;
   $documents = $mongoCollection->find();
 
   if (!extension_loaded('apcu')) {
@@ -46,10 +46,17 @@ while(true) {
     }
         
       
+    if ($src !== false) {
       $mongoCollection->updateOne(
-          ['_id' => $document->_id],
-          ['$set' => ['imgurl' => $src]]
+        ['_id' => $document->_id],
+        ['$set' => ['imgurl' => $src]]
       );
+    } else {
+      $mongoCollection->updateOne(
+        ['_id' => $document->_id],
+        ['$set' => ['imgurl' => "null"]]
+      );
+    }
   }
   sleep(3600);
 }

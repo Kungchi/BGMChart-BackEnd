@@ -9,6 +9,7 @@ $mongoClient = new MongoDB\Client("mongodb://localhost:27017");
 while(true) {
     // MongoDB에 연결
     $mongoCollection = $mongoClient->Music->Genie;
+    $mongoCollection->deleteMany([]);
 
     // Goutte Client 생성
     $client = new Client();
