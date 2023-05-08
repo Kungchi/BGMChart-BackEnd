@@ -48,23 +48,6 @@ while(true) {
             ['$set' => ['imgurl' => $artworkUrl]]
         );
     }
-
-    // 가장 근접한 이미지 크기를 찾는 함수
-    function getClosestImageSize($images, $desiredWidth, $desiredHeight) {
-        $closestImage = null;
-        $closestSizeDifference = null;
-
-        foreach ($images as $image) {
-            $sizeDifference = abs($image->width - $desiredWidth) + abs($image->height - $desiredHeight);
-
-            if ($closestSizeDifference === null || $sizeDifference < $closestSizeDifference) {
-                $closestImage = $image;
-                $closestSizeDifference = $sizeDifference;
-            }
-        }
-
-        return $closestImage;
-    }
     $mongoClient->Music->Melon->drop();
     $mongoClient->Music->Bugs->drop();
     $mongoClient->Music->Genie->drop();
@@ -75,5 +58,21 @@ while(true) {
     $mongoClient->Music->test->drop();
     sleep(3600);
 }
+    // 가장 근접한 이미지 크기를 찾는 함수
+function getClosestImageSize($images, $desiredWidth, $desiredHeight) {
+    $closestImage = null;
+    $closestSizeDifference = null;
 
+    foreach ($images as $image) {
+        $sizeDifference = abs($image->width - $desiredWidth) + abs($image->height - $desiredHeight);
+
+        if ($closestSizeDifference === null || $sizeDifference < $closestSizeDifference) {
+             $closestImage = $image;
+             $closestSizeDifference = $sizeDifference;
+        }
+    }
+
+    return $closestImage;
+
+}
 ?>

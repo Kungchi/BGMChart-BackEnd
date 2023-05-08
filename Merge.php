@@ -217,7 +217,7 @@ while(true) {
     $finalData = array_values($finalData);
 
     $testCol->deleteMany([]);
-    $testCol->insertMany($finalData);
+    $testCol->insertMany(array_slice($finalData, 0, 100));
     // 제안한 코드 추가 끝
 
     sleep(3600);
