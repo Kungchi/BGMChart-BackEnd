@@ -1,63 +1,79 @@
 <?php
 require 'vendor/autoload.php';
 
-use Goutte\Client;
 use MongoDB\Client as MongoClient;
 
+$clientId = 'f6e19bc8521a4e14bda43e624eddcdfb'; // 여기에 클라이언트 ID를 직접 입력하세요.
+$clientSecret = 'f9f3a3345ace4f2a9208c31d3916fb4f'; // 여기에 클라이언트 시크릿을 직접 입력하세요.
+
+$session = new SpotifyWebAPI\Session(
+    $clientId,
+    $clientSecret
+);
+
+$session->requestCredentialsToken();
+$accessToken = $session->getAccessToken();
+
+$api = new SpotifyWebAPI\SpotifyWebAPI();
+$api->setAccessToken($accessToken);
+
+// MongoDB에 연결
 $mongoClient = new MongoDB\Client("mongodb://localhost:27017");
 
 while(true) {
-  // MongoDB에 연결
-  $mongoCollection = $mongoClient->Music->test;
-  $documents = $mongoCollection->find();
+    $mongoCollection = $mongoClient->Music->test;
+    $documents = $mongoCollection->find();
 
-  if (!extension_loaded('apcu')) {
-    die('APCU 확장 모듈이 로드되어 있지 않습니다.');
-  }
+    foreach ($documents as $document) 
+    {
+        $title =  $document->title;
+        $singer =  $document->singer;
 
-  foreach ($documents as $document) {
-      $client = new Client();
-      // HTTP 요청 헤더 설정
-      $header = [
-          'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36',
-      ];
+        $cacheKey = "$title|$singer";
+        $artworkUrl = apcu_fetch($cacheKey);
 
-      $title = urlencode(trim(preg_replace('/\s+(FEAT|TWIN|WITH)\b.*$/i', '', $document->title)));
-      $singer = urlencode(trim(preg_replace('/(,|\().*/', '', $document->singer)));
-
-      $cacheKey = "$title|$singer";
-      $src = apcu_fetch($cacheKey);
-
-      $url = "https://music.bugs.co.kr/search/integrated?q=$title%20$singer";
-      
-      if ($src === false) {
-        $crawler = $client->request('GET', $url);
-        $Img_node = $crawler->filterXPath('//*[@id="DEFAULT0"]/table/tbody/tr[1]/td[2]/a/img');
-
-        if ($Img_node->count() > 0) {
-            $src = $Img_node->attr('src'); // src 속성 값 가져오기
-            // $src 변수에 이미지 주소가 저장됨
-
-            // 캐시 데이터 저장
-            apcu_store($cacheKey, $src);
-        } else {
-            error_log('href not found for document ' . $document->singer, 0);
+        if($artworkUrl == false) 
+        {
+            $searchResults = $api->search($title . ' ' . $singer, 'track', ['limit' => 1]);
+            $artworkUrl = '';
+            if (!empty($searchResults->tracks->items)) 
+            {
+                $closestImage = getClosestImageSize($searchResults->tracks->items[0]->album->images, 50, 50);
+                $artworkUrl = $closestImage->url;
+                apcu_store($cacheKey, $artworkUrl);
+            }
         }
+        $mongoCollection->updateOne(
+            ['_id' => $document->_id],
+            ['$set' => ['imgurl' => $artworkUrl]]
+        );
     }
-        
-      
-    if ($src !== false) {
-      $mongoCollection->updateOne(
-        ['_id' => $document->_id],
-        ['$set' => ['imgurl' => $src]]
-      );
-    } else {
-      $mongoCollection->updateOne(
-        ['_id' => $document->_id],
-        ['$set' => ['imgurl' => "null"]]
-      );
+
+    // 가장 근접한 이미지 크기를 찾는 함수
+    function getClosestImageSize($images, $desiredWidth, $desiredHeight) {
+        $closestImage = null;
+        $closestSizeDifference = null;
+
+        foreach ($images as $image) {
+            $sizeDifference = abs($image->width - $desiredWidth) + abs($image->height - $desiredHeight);
+
+            if ($closestSizeDifference === null || $sizeDifference < $closestSizeDifference) {
+                $closestImage = $image;
+                $closestSizeDifference = $sizeDifference;
+            }
+        }
+
+        return $closestImage;
     }
-  }
-  sleep(3600);
+    $mongoClient->Music->Melon->drop();
+    $mongoClient->Music->Bugs->drop();
+    $mongoClient->Music->Genie->drop();
+    $mongoClient->Music->Merge->drop();
+
+    $testCollectionData = $mongoClient->Music->test->find()->toArray();
+    $mongoClient->Music->Merge->insertMany($testCollectionData);
+    $mongoClient->Music->test->drop();
+    sleep(3600);
 }
+
 ?>

@@ -53,17 +53,6 @@ require 'vendor/autoload.php';
     $mongoCollection->insertMany($documents);
 
     $documents = $mongoCollection->find();
-
-    // HTML 테이블 생성
-    echo "<table>";
-    foreach ($documents as $document) {
-        echo "<tr>";
-        echo "<td>" . $document['rank'] . "</td>";
-        echo "<td>" . $document['title'] . "</td>";
-        echo "<td>" . $document['singer'] . "</td>";
-        echo "</tr>";
-    }
-    echo "</table>";
     sleep(3600);
 }
 ?>
