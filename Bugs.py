@@ -14,7 +14,7 @@ mongoClient = MongoClient(mongo_connection_string)
 
 while True:
     # Connect to MongoDB
-    mongoCollection = mongoClient['Music']['Melon'] 
+    mongoCollection = mongoClient['Music']['Bugs'] 
     mongoCollection.delete_many({})
 
     # User-Agent
