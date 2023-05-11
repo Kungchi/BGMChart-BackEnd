@@ -4,7 +4,9 @@ require 'vendor/autoload.php';
  use Goutte\Client;
  use MongoDB\Client as MongoClient;
 
- $mongoClient = new MongoDB\Client("mongodb://localhost:27017");
+ $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+ $dotenv->load();
+ $mongoClient = new MongoDB\Client($_ENV['MONGO_CONNECTION_STRING']);
 
  while(true) {
     // MongoDB에 연결

@@ -3,8 +3,11 @@ require 'vendor/autoload.php';
 
 use MongoDB\Client as MongoClient;
 
-$clientId = 'f6e19bc8521a4e14bda43e624eddcdfb'; // 여기에 클라이언트 ID를 직접 입력하세요.
-$clientSecret = 'f9f3a3345ace4f2a9208c31d3916fb4f'; // 여기에 클라이언트 시크릿을 직접 입력하세요.
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
+$clientId = $_ENV['SPOTIFY_CLIENT_ID'];
+$clientSecret = $_ENV['SPOTIFY_CLIENT_SECRET'];
 
 $session = new SpotifyWebAPI\Session(
     $clientId,
@@ -18,7 +21,7 @@ $api = new SpotifyWebAPI\SpotifyWebAPI();
 $api->setAccessToken($accessToken);
 
 // MongoDB에 연결
-$mongoClient = new MongoDB\Client("mongodb://localhost:27017");
+$mongoClient = new MongoDB\Client($_ENV['MONGO_CONNECTION_STRING']);
 
 while(true) {
     $mongoCollection = $mongoClient->Music->test;

@@ -100,7 +100,9 @@ function commonPrefixLength($str1, $str2, $max = 4) {
 }
 
 
-$mongoClient = new MongoDB\Client("mongodb://localhost:27017");
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+$mongoClient = new MongoDB\Client($_ENV['MONGO_CONNECTION_STRING']);
 
 while(true) {
     $testCol = $mongoClient->Music->test;
