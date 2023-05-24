@@ -1,14 +1,12 @@
-import time
 import spotipy
 import pymongo
 import os
 
 from spotipy.oauth2 import SpotifyClientCredentials
-from operator import itemgetter
 from cachetools import cached, TTLCache
 from dotenv import load_dotenv
 
-cache = TTLCache(maxsize=1000, ttl=3600)
+cache = TTLCache(maxsize=1000, ttl=43200)
 load_dotenv()
 
 client_id = os.getenv('SPOTIFY_CLIENT_ID')
@@ -35,7 +33,7 @@ def get_closest_image_size(images, desired_width, desired_height):
 
 @cached(cache)
 def get_artwork_url(title, singer):
-    results = sp.search(q='artist:' + singer + ' track:' + title, type='track')
+    results = sp.search(q=title + ' ' + singer, type='track', limit=1)
     items = results['tracks']['items']
     if len(items) > 0:
         images = items[0]['album']['images']
@@ -44,26 +42,23 @@ def get_artwork_url(title, singer):
     else:
         return ''
 
-while True:
-    test_collection = mongo_client.Music.test
-    documents = test_collection.find()
+test_collection = mongo_client.Music.test
+documents = test_collection.find()
 
-    for document in documents:
-        title = document['title']
-        singer = document['singer']
+for document in documents:
+    title = document['title']
+    singer = document['singer']
 
-        artwork_url = get_artwork_url(title, singer)
-        
-        test_collection.update_one(
-            {'_id': document['_id']},
-            {'$set': {'imgurl': artwork_url}}
-        )
+    artwork_url = get_artwork_url(title, singer)
 
-    mongo_client.Music.Melon.drop()
-    mongo_client.Music.Bugs.drop()
-    mongo_client.Music.Genie.drop()
-    mongo_client.Music.Merge.drop()
+    test_collection.update_one(
+        {'_id': document['_id']},
+        {'$set': {'imgurl': artwork_url}}
+    )
 
-    mongo_client.Music.test.rename('Merge')
+mongo_client.Music.Melon.drop()
+mongo_client.Music.Bugs.drop()
+mongo_client.Music.Genie.drop()
+mongo_client.Music.Merge.drop()
 
-    time.sleep(3600)
+mongo_client.Music.test.rename('Merge')
