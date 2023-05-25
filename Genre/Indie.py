@@ -1,58 +1,60 @@
-import requests
-import subprocess
-import regex as re  # Using regex package instead of re
+import spotipy
+import pymongo
 import os
+import random
+import subprocess
 
-from bs4 import BeautifulSoup
-from pymongo import MongoClient
+from spotipy.oauth2 import SpotifyClientCredentials
 from dotenv import load_dotenv
 
-# MongoDB Connection
 load_dotenv()
+
+# Spotify API 인증 정보
+client_id = os.getenv('SPOTIFY_CLIENT_ID')
+client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
+
+# Spotify API 클라이언트 인증
+client_credentials_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
+sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+
+# 플레이리스트 검색
+playlist_name = "인디"
+results = sp.search(q=playlist_name, type="playlist", market="KR")
+
+# MongoDB 연결
 mongo_connection_string = os.getenv('MONGO_CONNECTION_STRING')
-mongoClient = MongoClient(mongo_connection_string)
+mongo_client = pymongo.MongoClient(mongo_connection_string)
 
-# User-Agent
-headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'
-}
+test_collection = mongo_client.Genre.Indie
+test_collection.delete_many({})
 
-# Connect to MongoDB
-mongoCollection = mongoClient['Genre']['Indie']
-mongoCollection.delete_many({})
+if results["playlists"]["total"] > 0:
+    playlists = results["playlists"]["items"]
+    random_playlist = random.choice(playlists)
 
-pattern = re.compile(r"[^\p{Hangul}\p{Latin}\p{Nd}\s'\u2019&]+", re.UNICODE)
+    playlist_name = random_playlist["name"]
 
-for i in range(1, 101, 50):
-    # URL to scrape
-    url = f"https://www.melon.com/genre/song_list.htm?gnrCode=GN0500&steadyYn=Y#params%5BgnrCode%5D=GN0100&params%5BdtlGnrCode%5D=&params%5BorderBy%5D=NEW&params%5BsteadyYn%5D=Y&po=pageObj&startIndex={i}"
-    print(url)
+    # 플레이리스트의 트랙 목록 가져오기
+    playlist_tracks = sp.playlist_tracks(random_playlist["id"], market="KR")
+    total_tracks = min(200, playlist_tracks["total"])
+
+    for offset in range(0, total_tracks, 100):
+        tracks = sp.playlist_tracks(random_playlist["id"], offset=offset, limit=100)
+        for track in tracks["items"]:
+            track_name = track["track"]["name"]
+            artist_name = track["track"]["artists"][0]["name"]
+
+            # 트랙의 아트워크 URL 가져오기
+            artwork_url = track["track"]["album"]["images"][0]["url"]
+
+            # MongoDB에 데이터 저장
+            test_collection.insert_one({
+                "track_name": track_name,
+                "artist_name": artist_name,
+                "artwork_url": artwork_url
+            })
 
 
-    # Request the page
-    response = requests.get(url, headers=headers)
-
-    # Parse the page with BeautifulSoup
-    soup = BeautifulSoup(response.content, 'html.parser')
-
-    documents = []
-
-    rank_nodes = soup.select('td > div.wrap.t_center > span.rank')
-    title_nodes = soup.select('div.ellipsis.rank01 > span > a')
-    singer_nodes = soup.select('div.ellipsis.rank02 > span.checkEllipsis')
-    
-
-    for index in range(len(rank_nodes)):
-        title_text = title_nodes[index].text
-        title_filtered = re.sub(pattern, '', title_text)
-        title_filtered = title_filtered.upper().replace('PROD BY', 'PROD').replace('’', "'").strip()
-
-        documents.append({
-            'rank': int(rank_nodes[index].text.split('\n')[0]),  # Take the first part of the text, which is the rank
-            'title': title_filtered,
-            'singer': singer_nodes[index].text,
-        })
-
-    # Insert into MongoDB
-    mongoCollection.insert_many(documents)
+# 연결 종료
+mongo_client.close()
 subprocess.run(['sudo', 'python3', '/home/ubuntu/BGM_Back/Genre/R&B.py'])
