@@ -33,7 +33,7 @@ def get_closest_image_size(images, desired_width, desired_height):
 
 @cached(cache)
 def get_artwork_url(title, singer):
-    results = sp.search(q=title + ' ' + singer, type='track', limit=1)
+    results = sp.search(q=title + ' ' + singer, type='track', market="KR", limit=1)
     items = results['tracks']['items']
     if len(items) > 0:
         images = items[0]['album']['images']

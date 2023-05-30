@@ -18,7 +18,7 @@ sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 # 플레이리스트 검색
 playlist_name = "트로트"
-results = sp.search(q=playlist_name, type="playlist", market="JP")
+results = sp.search(q=playlist_name, type="playlist", market="KR")
 
 # MongoDB 연결
 mongo_connection_string = os.getenv('MONGO_CONNECTION_STRING')
@@ -34,7 +34,7 @@ if results["playlists"]["total"] > 0:
     playlist_name = random_playlist["name"]
 
     # 플레이리스트의 트랙 목록 가져오기
-    playlist_tracks = sp.playlist_tracks(random_playlist["id"], market="JP")
+    playlist_tracks = sp.playlist_tracks(random_playlist["id"], market="KR")
     total_tracks = min(200, playlist_tracks["total"])
 
     for offset in range(0, total_tracks, 100):
