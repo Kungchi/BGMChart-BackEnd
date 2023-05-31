@@ -3,6 +3,7 @@ import pymongo
 import os
 import random
 import subprocess
+from video import updateSong
 
 from spotipy.oauth2 import SpotifyClientCredentials
 from dotenv import load_dotenv
@@ -44,17 +45,14 @@ if results["playlists"]["total"] > 0:
             track_name = track["track"]["name"]
             artist_name = track["track"]["artists"][0]["name"]
 
-            # 트랙의 아트워크 URL 가져오기
-            artwork_url = track["track"]["album"]["images"][0]["url"]
-
             # MongoDB에 데이터 저장
             test_collection.insert_one({
                 "track_name": track_name,
                 "artist_name": artist_name,
-                "artwork_url": artwork_url
             })
+            
 
-
+updateSong(test_collection)
 # 연결 종료
 mongo_client.close()
 subprocess.run(['sudo', 'python3', '/home/ubuntu/BGM_Back/Genre/Dance.py'])
