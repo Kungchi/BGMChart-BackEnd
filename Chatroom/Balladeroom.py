@@ -13,7 +13,7 @@ def handle_message(data):
 def on_join(data):
     room = data['room']
     join_room(room)
-    socketio.send({'msg': data['userName'] + ' has entered the room. Ballade'}, room=room)
+    socketio.send({'msg': data['userName'] + ' has entered the room.' + data['room']}, room=room)
 
 @socketio.on('leave')
 def on_leave(data):
