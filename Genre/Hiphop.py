@@ -4,9 +4,9 @@ import os
 import random
 import subprocess
 
+from video import updateSong_google
 from spotipy.oauth2 import SpotifyClientCredentials
 from dotenv import load_dotenv
-from video import updateSong
 
 load_dotenv()
 
@@ -53,6 +53,6 @@ if results["playlists"]["total"] > 0:
 
 
 # 연결 종료
-updateSong(test_collection)
+updateSong_google(test_collection)
 mongo_client.close()
 subprocess.run(['sudo', 'python3', '/home/ubuntu/BGM_Back/Genre/Indie.py'])

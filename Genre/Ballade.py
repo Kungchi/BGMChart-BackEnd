@@ -3,8 +3,8 @@ import pymongo
 import os
 import random
 import subprocess
-from video import updateSong
 
+from video import updateSong_google
 from spotipy.oauth2 import SpotifyClientCredentials
 from dotenv import load_dotenv
 
@@ -52,8 +52,8 @@ if results["playlists"]["total"] > 0:
             })
             
 
-updateSong(test_collection)
+updateSong_google(test_collection)
 # 연결 종료
 mongo_client.close()
-subprocess.run(['sudo', 'python3', '/home/ubuntu/BGM_Back/Genre/Dance.py'])
+#subprocess.run(['sudo', 'python3', '/home/ubuntu/BGM_Back/Genre/Dance.py'])
 

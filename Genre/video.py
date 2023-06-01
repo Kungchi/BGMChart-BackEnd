@@ -1,38 +1,113 @@
-import requests
-from bs4 import BeautifulSoup
+from concurrent.futures import ThreadPoolExecutor
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
-def updateSong(collection):
-    songs = collection.find()
+def init_webdriver():
+    # WebDriver 설정
+    webdriver_options = Options()
+    webdriver_options.add_argument('--headless')  # 헤드리스 모드 설정
+    webdriver_options.add_argument('--no-sandbox')
+    webdriver_options.add_argument('--disable-dev-shm-usage')
 
-    for song in songs:
-        title = song.get('track_name')
-        singer = song.get('artist_name')
+    # WebDriver 초기화
+    wd = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=webdriver_options)
 
-        # Google 검색 URL
-        search_url = f"https://www.google.com/search?q={title}%20{singer}&tbm=vid"
+    return wd
 
-        # 검색결과 가져오기
-        headers = {
-            "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36"
-        }
-        response = requests.get(search_url, headers=headers)
-        soup = BeautifulSoup(response.text, 'html.parser')
-        print(response.status_code)
+def close_webdriver(wd):
+    wd.quit()
+
+def process_song_google(song, collection):
+    wd = init_webdriver()
+    title = song.get('track_name')
+    singer = song.get('artist_name')
+    
+    # Google 검색 URL
+    search_url = f"https://www.google.com/search?q={title}%20{singer}&tbm=vid"
+
+    # 검색결과 가져오기
+    wd.get(search_url)
+    wait = WebDriverWait(wd, 10)
+    a_tag = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div.ct3b9e > div.DhN8Cf > a')))
+    video_link = a_tag.get_attribute('href') if a_tag else None
+
+    for i in range(1, 10, 1):
+        if "https://www.youtube.com" not in video_link:
+            a_tags = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'div.ct3b9e > div.DhN8Cf > a')))
+            if len(a_tags) > 1:
+                video_link = a_tags[i].get_attribute('href')
+            else:
+                video_link = None
+        else:
+            break
+    
+    if "https://www.youtube.com" not in video_link:
+        filter = {'_id': song['_id']}
+        collection.delete_one(filter)
+        video_link = None
         
-        # 첫 번째 a태그 검색
-        a_tag = soup.select_one('div.ct3b9e > div.DhN8Cf > a')
-        video_link = a_tag.get('href') if a_tag else None
+    if video_link:
+        collection.update_one(
+            {'_id': song['_id']},
+            {'$set': {'video_link': video_link}}
+        )
+    else:
+        collection.delete_one({'_id': song['_id']})
+    
+    close_webdriver(wd)
 
-        # 첫 번째 링크가 YouTube가 아니라면 두 번째 링크 검색
-        if video_link not in "https://www.youtube.com":
-            a_tags = soup.select('div.ct3b9e > div.DhN8Cf > a')
-            if len(a_tags) > 1: # 두 개 이상의 일치하는 태그가 있는지 확인
-                a_tag = a_tags[1] # 두 번째 태그 선택
-                video_link = a_tag.get('href') if a_tag else None
-                
-        # MongoDB에 업데이트
-        if video_link:
-            collection.update_one(
-                {'_id': song['_id']},
-                {'$set': {'video_link': video_link}}
-            )
+def updateSong_google(collection):
+    songs = collection.find()
+    num_threads = 2
+
+    # ThreadPoolExecutor를 생성합니다
+    with ThreadPoolExecutor(max_workers=num_threads) as executor:
+        # 곡 리스트를 각 스레드에 분배하여 병렬 처리합니다
+        for song in songs:
+            executor.submit(process_song_google, song, collection)
+
+def process_song_bing(song, collection):
+    wd = init_webdriver()
+    title = song.get('track_name')
+    singer = song.get('artist_name')
+
+    # Bing 검색 URL
+    search_url = f"https://www.bing.com/videos/search?q={title}%20{singer}"
+
+    # 검색결과 가져오기
+    wd.get(search_url)
+    wait = WebDriverWait(wd, 10)
+    a_tag = wait.until(EC.presence_of_element_located((By.XPATH, '/html/body/div[4]/div[3]/div[2]/div/div[2]/div[1]/div[1]/div/a/div')))
+    video_link = a_tag.get_attribute('ourl') if a_tag else None
+    
+    for i in range(2, 10, 1):
+        if "https://www.youtube.com" not in video_link:
+            a_tag = wait.until(EC.presence_of_element_located((By.XPATH, f'/html/body/div[4]/div[3]/div[2]/div/div[2]/div[1]/div[{i}]/div/a/div')))
+            video_link = a_tag.get_attribute('ourl') if a_tag else None
+        else:
+            break
+    
+    if video_link:
+        collection.update_one(
+            {'_id': song['_id']},
+            {'$set': {'video_link': video_link}}
+        )
+    else:
+        collection.delete_one({'_id': song['_id']})
+
+    close_webdriver(wd)
+
+def updateSong_bing(collection):
+    songs = collection.find()
+    num_threads = 2
+
+    # ThreadPoolExecutor를 생성합니다
+    with ThreadPoolExecutor(max_workers=num_threads) as executor:
+        # 곡 리스트를 각 스레드에 분배하여 병렬 처리합니다
+        for song in songs:
+            executor.submit(process_song_bing, song, collection)

@@ -47,7 +47,7 @@ def SongMerge(allgenre, check):
                 print(f"Failed to process audio file {audio_file}: {str(e)}")
         
         # 결과 파일로 저장
-        output_dir = "./Chatroom/"+allgenre+check
+        output_dir = "./Chatroom/music/"+allgenre+check
         os.makedirs(output_dir, exist_ok=True)
         output_file = os.path.join(output_dir, f"{allgenre}{check}_combined_audio_{processed_songs + 1}-{processed_songs + batch_size}.mp3")
         combined_audio.export(output_file, format="mp3")

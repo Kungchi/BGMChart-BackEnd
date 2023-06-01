@@ -1,6 +1,6 @@
 from SongMerge import SongMerge
 
-genres = ['Ballade', 'Dance', 'Folk', 'HipHop', 'Indie', 'RB', 'Rock', 'Trot']
+genres = ['test', 'test1']
 
 # check 값을 파일에 저장하는 함수
 def save_check_value(value):
@@ -27,7 +27,7 @@ else:
 
 # genres 리스트를 반복하여 SongMerge 함수 실행
 for genre in genres:
-    SongMerge(genre + str(check))
+    SongMerge(genre , str(check))
 
 # 프로그램이 끝난 후 check 값을 저장
 save_check_value(check)
