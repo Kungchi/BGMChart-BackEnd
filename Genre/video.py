@@ -63,7 +63,7 @@ def process_song_google(song, collection):
 
 def updateSong_google(collection):
     songs = collection.find()
-    num_threads = 2
+    num_threads = 4
 
     # ThreadPoolExecutor를 생성합니다
     with ThreadPoolExecutor(max_workers=num_threads) as executor:
@@ -104,7 +104,7 @@ def process_song_bing(song, collection):
 
 def updateSong_bing(collection):
     songs = collection.find()
-    num_threads = 2
+    num_threads = 4
 
     # ThreadPoolExecutor를 생성합니다
     with ThreadPoolExecutor(max_workers=num_threads) as executor:

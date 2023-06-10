@@ -87,6 +87,6 @@ for group in grouped_data:
 final_data.sort(key=itemgetter('rank'))
 testCol.delete_many({})
 testCol.insert_many(final_data[:100])
-subprocess.run(['sudo', 'python3', '/home/ubuntu/BGM_Back/Basic/Img.py'])
+subprocess.Popen(['sudo', 'python3', '/home/ubuntu/BGM_Back/Basic/Img.py'])
     
 

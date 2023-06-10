@@ -55,5 +55,5 @@ if results["playlists"]["total"] > 0:
 updateSong_google(test_collection)
 # 연결 종료
 mongo_client.close()
-subprocess.run(['sudo', 'python3', '/home/ubuntu/BGM_Back/Genre/Dance.py'])
+subprocess.Popen(['sudo', 'python3', '/home/ubuntu/BGM_Back/Genre/Dance.py'])
 

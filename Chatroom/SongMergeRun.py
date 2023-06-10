@@ -1,3 +1,4 @@
+import subprocess
 from SongMerge import SongMerge
 
 genres = ['Ballade', "Dance", 'Folk', 'HipHop', 'Indie', 'RB', 'Rock', 'Trot']
@@ -32,3 +33,4 @@ for genre in genres:
 
 # 프로그램이 끝난 후 check 값을 저장
 # save_check_value(check)
+

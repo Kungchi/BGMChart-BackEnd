@@ -53,4 +53,4 @@ for i in range(1, 3):
     # Insert into MongoDB
     mongoCollection.insert_many(documents)
     
-subprocess.run(['sudo', 'python3', '/home/ubuntu/BGM_Back/Basic/Merge.py'])
+subprocess.Popen(['sudo', 'python3', '/home/ubuntu/BGM_Back/Basic/Merge.py'])

@@ -55,4 +55,4 @@ if results["playlists"]["total"] > 0:
 # 연결 종료
 updateSong_google(test_collection)
 mongo_client.close()
-subprocess.run(['sudo', 'python3', '/home/ubuntu/BGM_Back/Genre/Hiphop.py'])
+subprocess.Popen(['sudo', 'python3', '/home/ubuntu/BGM_Back/Genre/Hiphop.py'])
