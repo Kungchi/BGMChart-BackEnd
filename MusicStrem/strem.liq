@@ -9,7 +9,7 @@ Rockplaylist = playlist("/home/ubuntu/BGM_Back/MusicStrem/Rock")
 Trotplaylist = playlist("/home/ubuntu/BGM_Back/MusicStrem/Trot")
 
 # Icecast에 스트리밍
-output.icecast(%mp3, host = "localhost", port = 8000, password = "hackme", mount = "/Balade.mp3", mksafe(Balladeplaylist))
+output.icecast(%mp3, host = "localhost", port = 8000, password = "hackme", mount = "/Ballade.mp3", mksafe(Balladeplaylist))
 output.icecast(%mp3, host = "localhost", port = 8000, password = "hackme", mount = "/Dance.mp3", mksafe(Danceplaylist))
 output.icecast(%mp3, host = "localhost", port = 8000, password = "hackme", mount = "/Folk.mp3", mksafe(Folkplaylist))
 output.icecast(%mp3, host = "localhost", port = 8000, password = "hackme", mount = "/HipHop.mp3", mksafe(HipHopplaylist))

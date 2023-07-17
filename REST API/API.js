@@ -5,6 +5,9 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
+const axios = require('axios');
+const cheerio = require('cheerio');
+
 const {User, Merge, MusicSchema} = require('./models');
 
 const app = express();
@@ -54,6 +57,30 @@ app.get('/PlayList', async (req, res) => {
     const playlist = await PlayList.find();
     res.status(200).send(playlist);
 });
+
+app.post('/crawl', async (req, res) => {
+    const { keyword, page } = req.body;
+    const start = (page - 1) * 50;
+    const url = `https://music.bugs.co.kr/search/track?q=${keyword}&start=${start}`;
+
+    const response = await axios.get(url);
+    const $ = cheerio.load(response.data);
+    
+    const musicList = [];
+    $('table tbody tr').each((index, element) => {
+        const imgurl = $(element).find('td[2] a img').attr('src');
+        const title = $(element).find('th p a').attr('title');
+        let singer = $(element).find('td[4] p a').text();
+        if (!singer) {
+            singer = $(element).find('td[4] p span').text();
+        }
+
+        musicList.push({ title, singer, imgurl });
+    });
+
+    res.status(200).send(musicList);
+});
+
 
 app.listen(3000, () => {
     console.log('Server is running...');
