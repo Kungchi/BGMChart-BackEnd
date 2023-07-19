@@ -62,8 +62,11 @@ app.post('/crawl', async (req, res) => {
     const { keyword, page } = req.body;
     const start = (page - 1) * 50;
     const url = `https://music.bugs.co.kr/search/track?q=${keyword}&start=${start}`;
+    const headers = {
+        'User-Agent': 'Your User Agent String' // Replace 'Your User Agent String' with the desired user-agent
+    };
 
-    const response = await axios.get(url);
+    const response = await axios.get(url, { headers });
     const $ = cheerio.load(response.data);
     
     const musicList = [];
@@ -78,7 +81,8 @@ app.post('/crawl', async (req, res) => {
         musicList.push({ title, singer, imgurl });
     });
 
-    res.status(200).send(musicList);
+    console.log('Music List:', musicList);
+    res.status(200).send(musicList)
 });
 
 
