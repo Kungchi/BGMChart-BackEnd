@@ -60,30 +60,26 @@ app.get('/PlayList', async (req, res) => {
 
 app.post('/crawl', async (req, res) => {
     const { keyword, page } = req.body;
-    const start = (page - 1) * 50;
-    const url = `https://music.bugs.co.kr/search/track?q=${keyword}&start=${start}`;
-    const headers = {
-        'User-Agent': 'Your User Agent String' // Replace 'Your User Agent String' with the desired user-agent
-    };
+    const url = `https://music.bugs.co.kr/search/track?q=${keyword}&page=${page}`;
+    console.log('url', url);
 
-    const response = await axios.get(url, { headers });
+    const response = await axios.get(url);
     const $ = cheerio.load(response.data);
     
     const musicList = [];
-    $('table tbody tr').each((index, element) => {
-        const imgurl = $(element).find('td[2] a img').attr('src');
-        const title = $(element).find('th p a').attr('title');
-        let singer = $(element).find('td[4] p a').text();
-        if (!singer) {
-            singer = $(element).find('td[4] p span').text();
-        }
+    for (let i = 1; i <= 50; i++) {
+        const imgurl = $(`#DEFAULT0 > table > tbody > tr:nth-child(${i}) > td:nth-child(4) > a > img`).attr('src');
+        const title = $(`#DEFAULT0 > table > tbody > tr:nth-child(${i}) > th > p > a`).attr('title');
+        let singer = $(`#DEFAULT0 > table > tbody > tr:nth-child(${i}) > td:nth-child(7) > p > a`).text();
+
+        // 아이템이 없는 경우 루프를 종료합니다.
+        if (!title && !singer && !imgurl) break;
 
         musicList.push({ title, singer, imgurl });
-    });
-
-    console.log('Music List:', musicList);
-    res.status(200).send(musicList)
+    }
+    res.status(200).send(musicList);
 });
+
 
 
 app.listen(3000, () => {
