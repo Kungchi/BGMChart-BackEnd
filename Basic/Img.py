@@ -42,7 +42,7 @@ def get_artwork_url(title, singer):
     else:
         return ''
 
-test_collection = mongo_client.Music.test
+test_collection = mongo_client.Music.Merge
 documents = test_collection.find()
 
 for document in documents:
@@ -59,6 +59,3 @@ for document in documents:
 mongo_client.Music.Melon.drop()
 mongo_client.Music.Bugs.drop()
 mongo_client.Music.Genie.drop()
-mongo_client.Music.Merge.drop()
-
-mongo_client.Music.test.rename('Merge')

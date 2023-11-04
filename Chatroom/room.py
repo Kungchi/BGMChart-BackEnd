@@ -7,18 +7,24 @@ socketio = SocketIO(app)
 
 @socketio.on('message')
 def handle_message(data):
+    print(f"[INFO] Received message: {data['msg']} from room: {data['room']}")
     socketio.send(data, room=data['room'])
 
 @socketio.on('join')
 def on_join(data):
     room = data['room']
     join_room(room)
-    socketio.send({'msg': data['userName'] + ' has entered the room.' + data['room']}, room=room)
+    narration_message = "{} has entered the room.{}".format(data['userName'], data['room'])
+    socketio.send({'msg': narration_message}, room=room)
+
 
 @socketio.on('leave')
 def on_leave(data):
     room = data['room']
-    socketio.send({'msg': data['userName'] + ' has left the room.'}, room=room)
+    print(f"[INFO] {data['userName']} has left room: {room}")
+    narration_message = "{} has left the room.{}".format(data['userName'], data['room'])
+    socketio.send({'msg': narration_message}, room=room)
+
     leave_room(room)
 
 if __name__ == '__main__':

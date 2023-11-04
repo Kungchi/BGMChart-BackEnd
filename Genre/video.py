@@ -7,6 +7,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+from urllib.parse import quote
+
 def init_webdriver():
     # WebDriver 설정
     webdriver_options = Options()
@@ -28,17 +30,20 @@ def process_song_google(song, collection):
     singer = song.get('artist_name')
     
     # Google 검색 URL
-    search_url = f"https://www.google.com/search?q={title}%20{singer}&tbm=vid"
+    search_query = f"{title} {singer}"
+    search_url = f"https://www.google.com/search?q={quote(search_query)}&tbm=vid"
+    
+    print("검색 URL:", search_url)
 
     # 검색결과 가져오기
     wd.get(search_url)
     wait = WebDriverWait(wd, 10)
-    a_tag = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div.ct3b9e > div.DhN8Cf > a')))
+    a_tag = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div.xe8e1b > div > div > span > a')))
     video_link = a_tag.get_attribute('href') if a_tag else None
 
     for i in range(1, 10, 1):
         if "https://www.youtube.com" not in video_link:
-            a_tags = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'div.ct3b9e > div.DhN8Cf > a')))
+            a_tags = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'div.xe8e1b > div > div > span > a')))
             if len(a_tags) > 1:
                 video_link = a_tags[i].get_attribute('href')
             else:
@@ -77,12 +82,15 @@ def process_song_bing(song, collection):
     singer = song.get('artist_name')
 
     # Bing 검색 URL
-    search_url = f"https://www.bing.com/videos/search?q={title}%20{singer}"
+    search_query = f"{title} {singer} youtube"
+    search_url = f"https://www.bing.com/videos/search?q={quote(search_query)}"
+    
+    print("검색 URL:", search_url)
 
     # 검색결과 가져오기
     wd.get(search_url)
     wait = WebDriverWait(wd, 10)
-    a_tag = wait.until(EC.presence_of_element_located((By.XPATH, '/html/body/div[4]/div[3]/div[2]/div/div[2]/div[1]/div[1]/div/a/div')))
+    a_tag = wait.until(EC.presence_of_element_located((By.XPATH, '/html/body/div[4]/div[3]/div[2]/div/div[2]/div[1]/div[1]/div/a/div')))    
     video_link = a_tag.get_attribute('ourl') if a_tag else None
     
     for i in range(2, 10, 1):

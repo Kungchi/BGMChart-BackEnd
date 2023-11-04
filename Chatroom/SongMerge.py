@@ -27,6 +27,11 @@ def SongMerge(allgenre):  # ---> , check
         
         # 유튜브 URL을 사용하여 오디오 추출
         for i, song in enumerate(songs):
+            if 'video_link' not in song or song['video_link'] is None:
+                continue
+            if "youtube.com" not in song['video_link']:
+                continue
+                
             url = song['video_link']
             print(f"Current URL: {url}")
             try:

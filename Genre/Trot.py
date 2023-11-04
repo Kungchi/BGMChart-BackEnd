@@ -55,4 +55,4 @@ updateSong_bing(test_collection) # WebDriver 인스턴스 사용
 
 # 연결 종료
 mongo_client.close()
-subprocess.Popen(['sudo', 'python3', '/home/ubuntu/BGM_Back/Chatroom/SongMergeRun.py'])
+subprocess.Popen(['python3', '/home/ubuntu/BGM_Back/Chatroom/SongMergeRun.py'])

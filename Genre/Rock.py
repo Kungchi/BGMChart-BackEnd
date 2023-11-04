@@ -55,4 +55,4 @@ if results["playlists"]["total"] > 0:
 # 연결 종료
 updateSong_bing(test_collection)
 mongo_client.close()
-subprocess.Popen(['sudo', 'python3', '/home/ubuntu/BGM_Back/Genre/Trot.py'])
+subprocess.Popen(['python3', '/home/ubuntu/BGM_Back/Genre/Trot.py'])

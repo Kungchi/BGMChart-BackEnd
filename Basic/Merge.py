@@ -29,15 +29,15 @@ load_dotenv()
 mongo_connection_string = os.getenv('MONGO_CONNECTION_STRING')
 mongoClient = MongoClient(mongo_connection_string)
 
-testCol = mongoClient['Music']['test']
+testCol = mongoClient['Music']['Merge']
 testCol.delete_many({})
 
 pipeline = [
-    {'$project': {'rank': 1, 'title': 1, 'singer': 1, 'source': {'$literal': 'melon'}}},
-    {'$unionWith': {'coll': 'Bugs', 'pipeline': [{'$project': {'rank': 1, 'title': 1, 'singer': 1, 'source': {'$literal': 'bugs'}}}]}},
-    {'$unionWith': {'coll': 'Genie', 'pipeline': [{'$project': {'rank': 1, 'title': 1, 'singer': 1, 'source': {'$literal': 'genie'}}}]}},
-    {'$sort': {'rank': 1}},
-    {'$out': 'test'}
+    {'$project': {'title': 1, 'singer': 1, 'Melon_rank': 1, 'source': {'$literal': 'melon'}}},
+    {'$unionWith': {'coll': 'Bugs', 'pipeline': [{'$project': {'title': 1, 'singer': 1, 'Bugs_rank': 1, 'source': {'$literal': 'bugs'}}}]}},
+    {'$unionWith': {'coll': 'Genie', 'pipeline': [{'$project': {'title': 1, 'singer': 1, 'Genie_rank': 1, 'source': {'$literal': 'genie'}}}]}},
+    {'$sort': {'Melon_rank': 1, 'Bugs_rank': 1, 'Genie_rank': 1}},
+    {'$out': 'Merge'}
 ]
 
 mongoClient['Music']['Melon'].aggregate(pipeline, allowDiskUse=True)
@@ -71,9 +71,14 @@ for value in merged_data:
         })
 
 for group in grouped_data:
-    total_rank = sum(value['rank'] for value in group['values'])
-    total_count = len(group['values'])
-    group['averageRank'] = total_rank / total_count
+    melon_rank = next((value.get('Melon_rank', 0) for value in group['values'] if value['source'] == 'melon'), 0)
+    bugs_rank = next((value.get('Bugs_rank', 0) for value in group['values'] if value['source'] == 'bugs'), 0)
+    genie_rank = next((value.get('Genie_rank', 0) for value in group['values'] if value['source'] == 'genie'), 0)
+
+    group['MelonRank'] = melon_rank
+    group['BugsRank'] = bugs_rank
+    group['GenieRank'] = genie_rank
+
 
 final_data = []
 
@@ -81,12 +86,14 @@ for group in grouped_data:
     final_data.append({
         'title': group['values'][0]['title'],
         'singer': group['values'][0]['singer'],          
-        'rank': int(group['averageRank'])
+        'Melon_rank': group['MelonRank'],
+        'Bugs_rank': group['BugsRank'],
+        'Genie_rank': group['GenieRank']
     })
 
-final_data.sort(key=itemgetter('rank'))
 testCol.delete_many({})
 testCol.insert_many(final_data[:100])
-subprocess.Popen(['sudo', 'python3', '/home/ubuntu/BGM_Back/Basic/Img.py'])
+
+#subprocess.Popen(['python3', '/home/ubuntu/BGM_Back/Basic/Img.py'])
     
 
