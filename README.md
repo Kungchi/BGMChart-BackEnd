@@ -11,6 +11,7 @@ BGMChart 백엔드(각 음원사이트 순위 종합 및 뮤직 플레이어)
 ### 💾개발환경
 * **Python**
 * **AWS EC2 Ubuntu**
+* **Visual Studio Code**
 * **MongoDB Atlas**
 * **Icecast**
 * **Liquidsoap**
