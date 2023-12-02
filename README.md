@@ -1,5 +1,5 @@
 # BGMChart-BackEnd
-BGMChart 백엔드(각 음원사이트 순위 종합 및 뮤직 플레이어)
+BGMChart 백엔드(각 음원사이트 순위 종합 및 뮤직 플레이어)  
 [BGMChart 프론트엔드](https://github.com/Kungchi/BGMChart-FrontEnd)
 
 # ⌛개발 기간
