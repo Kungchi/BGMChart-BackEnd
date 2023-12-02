@@ -30,8 +30,8 @@ BGMChart 백엔드(각 음원사이트 순위 종합 및 뮤직 플레이어)
 4. **[장르별 음악 정보 크롤링](https://github.com/Kungchi/BGMChart-BackEnd/wiki/%EC%9E%A5%EB%A5%B4%EB%B3%84-%EC%9D%8C%EC%95%85-%EC%A0%95%EB%B3%B4-%ED%81%AC%EB%A1%A4%EB%A7%81)**
 * spotipy API를 사용해서 특정 장르 정보 가져오기
 
-6. **[장르별 음악 추출](https://github.com/Kungchi/BGMChart-BackEnd/wiki/%EC%9E%A5%EB%A5%B4%EB%B3%84-%EC%9D%8C%EC%95%85-%EC%B6%94%EC%B6%9C)**
+5. **[장르별 음악 추출](https://github.com/Kungchi/BGMChart-BackEnd/wiki/%EC%9E%A5%EB%A5%B4%EB%B3%84-%EC%9D%8C%EC%95%85-%EC%B6%94%EC%B6%9C)**
 * AudioSegment 라이브러리와 pytube 라이브러리를 사용해서 유튜브 음원 추출
 
-8. **[음악 스트리밍](https://github.com/Kungchi/BGMChart-BackEnd/wiki/%EC%9D%8C%EC%95%85-%EC%8A%A4%ED%8A%B8%EB%A6%AC%EB%B0%8D)**
+6. **[음악 스트리밍](https://github.com/Kungchi/BGMChart-BackEnd/wiki/%EC%9D%8C%EC%95%85-%EC%8A%A4%ED%8A%B8%EB%A6%AC%EB%B0%8D)**
 * Liquidsoap와 Icecast를 사용해서 노래 스트리밍 
